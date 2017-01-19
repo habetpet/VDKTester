@@ -1,0 +1,4 @@
+Celkem zkontrolováno: 1000 titulů
+čas: 47s
+Potvrzených unikátů: 663 (66.3%)
+Možných duplicit: : 337 (33.7%)
