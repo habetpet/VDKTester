@@ -125,10 +125,14 @@ public class MyVDKTesterFXMLController implements Initializable {
     private TextFlow textFlow;
     @FXML
     private MenuButton saveButton;
+    @FXML
+    private Button undoButton;
 
     public MyVDKTesterFXMLController() {
         this.urlBuilder = new URLBuilder();
         this.htmlParser = new HTMLParser();
+        
+
         
         this.serviceAutomaticSorter = new Service(){
             @Override
@@ -167,6 +171,12 @@ public class MyVDKTesterFXMLController implements Initializable {
                  @Override
                  protected Void call() throws URISyntaxException, MalformedURLException, IOException{
                     checkFieldsButton.setDisable(true);
+                    if (i != 0) {
+                        undoButton.setDisable(false);
+                    }
+                    else {
+                        undoButton.setDisable(true);
+                    }
                     String titleFromCSV = titles.get(i);
                     String[] line = lines.get(i); 
         
@@ -225,6 +235,7 @@ public class MyVDKTesterFXMLController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) { 
         this.progressIndicator.setVisible(false);
         this.checkFieldsButton.setDisable(true);
+        this.undoButton.setDisable(true);
         MenuItem saveU = new MenuItem("Save uniques"); 
         MenuItem saveD = new MenuItem("Save duplicities"); 
         this.saveButton.getItems().clear();
@@ -368,6 +379,10 @@ public class MyVDKTesterFXMLController implements Initializable {
             @Override
             public void handle(MouseEvent event) {
                 checkFieldsButton.setDisable(true);
+                Text text = new Text ("Zkontrolováno " + i + "/" + lines.size() + " titulů. \n"
+                    + "Unikátů: " + positionOfUniques.size() + " Duplicit: " + positionOfDuplicities.size());
+                textFlow.getChildren().clear();
+                textFlow.getChildren().add(text);
                 webView1.getEngine().load(leftURL);
             }   
         });
@@ -376,6 +391,10 @@ public class MyVDKTesterFXMLController implements Initializable {
             @Override
             public void handle(MouseEvent event) {
                 checkFieldsButton.setDisable(true);
+                Text text = new Text ("Zkontrolováno " + i + "/" + lines.size() + " titulů. \n"
+                    + "Unikátů: " + positionOfUniques.size() + " Duplicit: " + positionOfDuplicities.size());
+                textFlow.getChildren().clear();
+                textFlow.getChildren().add(text);
                 webView2.getEngine().load(rightURL);
             }   
         });
@@ -487,12 +506,12 @@ public class MyVDKTesterFXMLController implements Initializable {
     @FXML
     private void addToUniques(ActionEvent event) throws UnsupportedEncodingException, IOException, URISyntaxException {
         this.positionOfUniques.add(i);
-        if(i < this.lines.size() - 1) {           
-            i++;
+        i++;
+        if (i < this.lines.size()) {              
             this.manualSearching(event);
         }
         else {
-            Text text = new Text ("Zkontrolováno " + (i + 1) + "/" + this.lines.size() + " titulů\n"
+            Text text = new Text ("Zkontrolováno " + i + "/" + this.lines.size() + " titulů\n"
                 + "Unikátů: " + this.positionOfUniques.size() + " Duplicit: " + this.positionOfDuplicities.size());
             this.textFlow.getChildren().clear();
             this.textFlow.getChildren().add(text);
@@ -504,8 +523,8 @@ public class MyVDKTesterFXMLController implements Initializable {
     @FXML
     private void addToDuplicities(ActionEvent event) throws UnsupportedEncodingException, IOException, URISyntaxException {
         this.positionOfDuplicities.add(i);
-        if(i < this.lines.size() - 1) {           
-            i++;
+        i++;
+        if (i < this.lines.size()) {                 
             this.manualSearching(event);
         }
         else {
@@ -541,10 +560,10 @@ public class MyVDKTesterFXMLController implements Initializable {
         this.textFlow.getChildren().addAll(boldISBN, comparingISBN, boldCCNB, comparingCCNB, boldTitle, comparingTitle);
     }
     
-    private Optional<ButtonType> confirmationWindow(String typeOfSortedTitiles) {
+    private Optional<ButtonType> confirmationWindow(String typeOfSortedTitles) {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Confirmation Dialog");
-        alert.setHeaderText("Nenalezeny žádné " + typeOfSortedTitiles + ".");
+        alert.setHeaderText("Nenalezeny žádné " + typeOfSortedTitles + ".");
         alert.setContentText("Chcete uložit prázdný soubor?");
         
         Optional<ButtonType> result = alert.showAndWait();
@@ -560,5 +579,21 @@ public class MyVDKTesterFXMLController implements Initializable {
 
     @FXML
     private void saveItems(ActionEvent event) {
+    }
+
+    @FXML
+    private void undoAction(ActionEvent event) throws IOException, UnsupportedEncodingException, URISyntaxException {
+        if (i != 0) {
+            i = i - 1;
+            if (this.positionOfUniques.contains(i)) {
+                this.positionOfUniques.remove(i);
+            }
+            if (this.positionOfDuplicities.contains(i)) {
+                this.positionOfDuplicities.remove(i);
+            }
+            this.manualSearching(event);
+        }
+        this.addToUniquesButton.setDisable(false);
+        this.addToDuplicitiesButton.setDisable(false);
     }
 }

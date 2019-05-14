@@ -44,18 +44,19 @@
                         <Button fx:id="checkFieldsButton" layoutX="5.0" layoutY="356.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#checkFields" prefHeight="40.0" prefWidth="125.0" text="Check fields" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="340.0" />
                         <Separator layoutX="-14.0" layoutY="57.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0" />
                         <Separator layoutY="106.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="110.0" />
-                        <Separator layoutX="-14.0" layoutY="403.0" prefHeight="0.0" prefWidth="211.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="385.0" />
-                        <ProgressIndicator fx:id="progressIndicator" layoutX="42.0" layoutY="491.0" prefHeight="45.0" prefWidth="63.0" progress="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="440.0">
+                        <Separator layoutX="-14.0" layoutY="403.0" prefHeight="4.0" prefWidth="141.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="430.0" />
+                        <ProgressIndicator fx:id="progressIndicator" layoutX="42.0" layoutY="491.0" prefHeight="45.0" prefWidth="63.0" progress="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="490.0">
                            <effect>
                               <SepiaTone />
                            </effect>
                         </ProgressIndicator>
-                        <MenuButton fx:id="saveButton" alignment="CENTER" layoutX="8.0" layoutY="400.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#saveItems" prefHeight="40.0" prefWidth="125.0" text="Save" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="390.0">
+                        <MenuButton fx:id="saveButton" alignment="CENTER" layoutX="8.0" layoutY="400.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#saveItems" prefHeight="40.0" prefWidth="125.0" text="Save" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="440.0">
                           <items>
                             <MenuItem mnemonicParsing="false" text="Action 1" />
                             <MenuItem mnemonicParsing="false" text="Action 2" />
                           </items>
                         </MenuButton>
+                        <Button fx:id="undoButton" layoutX="19.0" layoutY="406.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#undoAction" prefHeight="40.0" prefWidth="125.0" text="Undo" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="385.0" />
                      </children></AnchorPane>
                </left>
             </BorderPane>
