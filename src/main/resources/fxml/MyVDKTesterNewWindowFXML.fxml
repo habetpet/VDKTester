@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.myvdktester.MyVDKTesterNewWindowFXMLController">
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxml.MyVDKTesterNewWindowFXMLController">
    <children>
       <ComboBox fx:id="chooseSourceCB" layoutX="28.0" layoutY="90.0" onAction="#choosingSource" prefHeight="47.0" prefWidth="192.0" promptText="Knihovna" />
       <Label layoutX="28.0" layoutY="43.0" prefHeight="33.0" prefWidth="192.0" text="Vyber knihovnu a soubor:" />

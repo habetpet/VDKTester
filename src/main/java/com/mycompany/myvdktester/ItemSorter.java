@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.commons.text.similarity.LevenshteinDistance;
+import org.apache.commons.text.similarity.JaroWinklerDistance;
+//import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.jsoup.nodes.Document;
+
 
 /**
  *
@@ -34,23 +36,22 @@ public class ItemSorter {
     //                                              pokud je jeden prefix druhého, vzdálenost je 1.0   
     // TODO: rozdělit potencialTitle a titleFromCSV na slova a ty zkontrolovat podle Levenshteina
     // získá se tím důslednější porovnávání titulů!
-    public static ArrayList<Double> compareTitles(String titleFromCSV, ArrayList<String> potencialTitles) {
-        ArrayList<Double> distancesDecimal = new ArrayList<>();
-        LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
-        titleFromCSV = titleFromCSV.replaceAll("\\p{Punct}", "").replaceAll(" ", "").toLowerCase();
-        for(int i = 0; i < potencialTitles.size(); i++) {                    
-            String potencialTitle = potencialTitles.get(i).replaceAll("\\p{Punct}", "").replaceAll(" ", "").toLowerCase();
-            if(titleFromCSV.contains(potencialTitle) || potencialTitle.contains(titleFromCSV)) {
-                distancesDecimal.add(1.0);
+    public static Double compareTitles(String firstTitle, String secondTitle) {
+        Double distancesDecimal;
+        //LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
+        JaroWinklerDistance jaroWinklerDistance = new JaroWinklerDistance();
+        firstTitle = firstTitle.replaceAll("\\p{Punct}", "").replaceAll(" ", "").toLowerCase();
+        secondTitle = secondTitle.replaceAll("\\p{Punct}", "").replaceAll(" ", "").toLowerCase();
+            if(firstTitle.contains(secondTitle) || secondTitle.contains(firstTitle)) {
+                distancesDecimal = 1.0;
             }
             else {
-                int longerLength = Math.max(titleFromCSV.length(), potencialTitle.length());
-                int distance = levenshteinDistance.apply(titleFromCSV, potencialTitle);
-                distancesDecimal.add((longerLength - distance)/(double)longerLength);
+                //int longerLength = Math.max(firstTitle.length(), secondTitle.length());
+                //int distance = levenshteinDistance.apply(firstTitle, secondTitle);
+                //distancesDecimal = (longerLength - distance)/(double)longerLength;
+                distancesDecimal = jaroWinklerDistance.apply(firstTitle, secondTitle); 
             }
-        }
+     
     return distancesDecimal;
     }
-   
-
 }

@@ -68,17 +68,54 @@ public class HTMLParser {
     }
     
     // metoda získá datum vydání parsováním stránky se záznamem v MARC 21
-    public String getPublicationDateInfofromMARC21(Document doc) {
+    public String getPublicationInfofromMARC21(Document doc) {
         Elements records = doc.select("tr");        
-        String publicationInfo = records.select("th:contains(260)").next().text().replaceAll("\\s","");     
+        String publicationInfo = records.select("th:contains(260)").next().text();     
     return publicationInfo;
     }
     
-    public String getTitleInfofromMARC21(Document doc) {
-        String titleInfo;
+    public String getTitleStatementfromMARC21(Document doc) {
+        String titleStatement;
         Elements records = doc.select("tr");        
-        titleInfo = records.select("th:contains(245)").next().text();   
-    return titleInfo;
+        titleStatement = records.select("th:contains(245)").next().text();   
+    return titleStatement;
+    }
+    
+    public String getPhysicalDescriptionInfofromMARC21(Document doc) {
+        String physicalDescriptionInfo;
+        Elements records = doc.select("tr");        
+        physicalDescriptionInfo = records.select("th:contains(300)").next().text();   
+    return physicalDescriptionInfo;
+    }
+    
+    public String getMainEntryPersonalNameInfofromMARC21(Document doc) {
+        String mainEntryPersonalNameInfo;
+        Elements records = doc.select("tr");        
+        mainEntryPersonalNameInfo = records.select("th:contains(100)").next().text();   
+    return mainEntryPersonalNameInfo;
+    }
+    
+    public String getMainEntryCorporateNameInfofromMARC21(Document doc) {
+        String mainEntryCorporateNameInfo;
+        Elements records = doc.select("tr");        
+        mainEntryCorporateNameInfo = records.select("th:contains(110)").next().text();   
+    return mainEntryCorporateNameInfo;
+    }
+    
+    public String getMainEntryMeetingNameInfofromMARC21(Document doc) {
+        String mainEntryMeetingNameInfo;
+        Elements records = doc.select("tr");        
+        mainEntryMeetingNameInfo = records.select("th:contains(111)").next().text();   
+    return mainEntryMeetingNameInfo;
+    }
+    
+    public ArrayList<String> getAddedEntryPersonalNameInfofromMARC21(Document doc) {
+        ArrayList<String> mainAddedPersonalNameInfo = new ArrayList<>();
+        Elements records = doc.select("tr").select("th:contains(700)").next();
+        records.forEach((el) -> {
+            mainAddedPersonalNameInfo.add(el.text());
+        });
+    return mainAddedPersonalNameInfo;
     }
     
     

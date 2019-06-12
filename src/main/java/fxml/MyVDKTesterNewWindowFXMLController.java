@@ -1,4 +1,4 @@
-package com.mycompany.myvdktester;
+package fxml;
 
 import java.io.File;
 import java.net.URL;

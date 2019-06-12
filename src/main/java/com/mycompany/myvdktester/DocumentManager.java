@@ -59,9 +59,10 @@ public class DocumentManager {
     // metoda získá všechny ID těch titulů, které mají s příslušným titulem z csv shodu min 70%
     public static ArrayList<String> getIDsOfSimilarTitles(Elements items, String titleFromCSV, ArrayList<String> allTitlesOnPage) {
         ArrayList<String> selectedIDsOfSimilarTitles = new ArrayList<>();
-        ArrayList<Double> distancesDecimal = ItemSorter.compareTitles(titleFromCSV, allTitlesOnPage);
-        for(int i = 0; i < distancesDecimal.size(); i++) {
-            if(distancesDecimal.get(i) > 0.7) {
+        Double distancesDecimal;
+        for(int i = 0; i < allTitlesOnPage.size(); i++) {
+            distancesDecimal = ItemSorter.compareTitles(titleFromCSV, allTitlesOnPage.get(i));
+            if(distancesDecimal > 0.7) {
                 selectedIDsOfSimilarTitles.add(items.select("li").get(i).id());
             }
         }
@@ -85,32 +86,45 @@ public class DocumentManager {
     return null;
     }
     public static String getISBNfromMARC21(String isbnInfo) {
-        String isbnRecord = null;
+        String isbn = "---";
         int startIndex = isbnInfo.indexOf("|a");
         if(startIndex >= 0) {
-            isbnRecord = isbnInfo.substring(startIndex + 2);
-            int endIndex = isbnRecord.indexOf("|");
+            isbn = isbnInfo.substring(startIndex + 2);
+            int endIndex = isbn.indexOf("|");
             if(endIndex >= 0) {
-                isbnRecord = isbnInfo.substring(startIndex + 2,startIndex + 2 + endIndex);
+                isbn = isbnInfo.substring(startIndex + 2,startIndex + 2 + endIndex);
             }
         }
-    return isbnRecord;
+    return isbn;
     }
     
-    public static String getCCNBfromMARC21(String isbnInfo) {
-        String ccnbRecord = null;
-        int startIndex = isbnInfo.indexOf("|acnb");
+    public static String getWrongISBNfromMARC21(String isbnInfo) {
+        String wrongISBN = "---";
+        int startIndex = isbnInfo.indexOf("|z");
         if(startIndex >= 0) {
-            ccnbRecord = isbnInfo.substring(startIndex + 5);
-            int endIndex = ccnbRecord.indexOf("|");
+            wrongISBN = isbnInfo.substring(startIndex + 2);
+            int endIndex = wrongISBN.indexOf("|");
             if(endIndex >= 0) {
-                ccnbRecord = isbnInfo.substring(startIndex + 5,startIndex + 5 + endIndex);
+                wrongISBN = isbnInfo.substring(startIndex + 2,startIndex + 2 + endIndex);
             }
         }
-    return ccnbRecord;
+    return wrongISBN;
+    }
+    public static String getCCNBfromMARC21(String isbnInfo) {
+        String ccnb = "---";
+        int startIndex = isbnInfo.indexOf("|acnb");
+        if(startIndex >= 0) {
+            ccnb = isbnInfo.substring(startIndex + 5);
+            int endIndex = ccnb.indexOf("|");
+            if(endIndex >= 0) {
+                ccnb = isbnInfo.substring(startIndex + 5,startIndex + 5 + endIndex);
+            }
+        }
+    return ccnb;
     }
     public static String getPublicationDatefromMARC21(String publicationInfo) {
-        String publicationDate = null;
+        String publicationDate = "---";
+        publicationInfo = publicationInfo.replaceAll("\\s", "");
         int startIndex = publicationInfo.indexOf("|c");
         if(startIndex >= 0) {
             publicationDate = publicationInfo.substring(startIndex + 2);
@@ -122,16 +136,116 @@ public class DocumentManager {
     return publicationDate;
     }
     
-    public static String getTitlefromMARC21(String titleInfo) {
-        String titleMARC21 = null;
-        int startIndex = titleInfo.indexOf("| a");
+    public static String getPublisherfromMARC21(String publicationInfo) {
+        String publisher = "---";
+        int startIndex = publicationInfo.indexOf("| b");
         if(startIndex >= 0) {
-            titleMARC21 = titleInfo.substring(startIndex + 3);
-            int endIndex = titleMARC21.indexOf("|");
+            publisher = publicationInfo.substring(startIndex + 3);
+            int endIndex = publisher.indexOf("|");
             if(endIndex >= 0) {
-                titleMARC21 = titleInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
+                publisher = publicationInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
             }
         }      
-    return titleMARC21;
+    return publisher;
+    }
+    
+    public static String getPlaceOfPublicationfromMARC21(String publicationInfo) {
+        String placeOfPublication = "---";
+        int startIndex = publicationInfo.indexOf("| a");
+        if(startIndex >= 0) {
+            placeOfPublication = publicationInfo.substring(startIndex + 3);
+            int endIndex = placeOfPublication.indexOf("|");
+            if(endIndex >= 0) {
+                placeOfPublication = publicationInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
+            }
+        }      
+    return placeOfPublication;
+    }
+
+    public static String getTitlefromMARC21(String titleInfo) {
+        String title = "---";
+        int startIndex = titleInfo.indexOf("| a");
+        if(startIndex >= 0) {
+            title = titleInfo.substring(startIndex + 3);
+            int endIndex = title.indexOf("|");
+            if(endIndex >= 0) {
+                title = titleInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
+            }
+        }      
+    return title;
+    }
+    
+    public static String getRemainderOfTitlefromMARC21(String titleInfo) {
+        String remainderOfTitle = "---";
+        int startIndex = titleInfo.indexOf("| b");
+        if(startIndex >= 0) {
+            remainderOfTitle = titleInfo.substring(startIndex + 3);
+            int endIndex = remainderOfTitle.indexOf("|");
+            if(endIndex >= 0) {
+                remainderOfTitle = titleInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
+            }
+        }      
+    return remainderOfTitle;
+    }
+    
+    public static String getExtentfromMARC21(String physicalDescriptionInfo) {
+        String extent = "---";
+        int startIndex = physicalDescriptionInfo.indexOf("| a");
+        if(startIndex >= 0) {
+            extent = physicalDescriptionInfo.substring(startIndex + 3);
+            int endIndex = extent.indexOf("|");
+            if(endIndex >= 0) {
+                extent = physicalDescriptionInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
+            }
+        }      
+    return extent;
+    }
+    
+    public static String getMainEntryPersonalNamefromMARC21(String mainEntryPersonalNameInfo) {
+        String mainEntryPersonalName = "---";
+        int startIndex = mainEntryPersonalNameInfo.indexOf("| a");
+        if(startIndex >= 0) {
+            mainEntryPersonalName = mainEntryPersonalNameInfo.substring(startIndex + 3);
+            int endIndex = mainEntryPersonalName.indexOf("|");
+            if(endIndex >= 0) {
+                mainEntryPersonalName = mainEntryPersonalNameInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
+            }
+        }      
+    return mainEntryPersonalName;
+    }
+    
+    public static String getMainEntryfromMARC21(String mainEntryInfo) {
+        String mainEntryPersonalName = "---";
+        int startIndex = mainEntryInfo.indexOf("| a");
+        if(startIndex >= 0) {
+            mainEntryPersonalName = mainEntryInfo.substring(startIndex + 3);
+            int endIndex = mainEntryPersonalName.indexOf("|");
+            if(endIndex >= 0) {
+                mainEntryPersonalName = mainEntryInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
+            }
+        }      
+    return mainEntryPersonalName;
+    }
+    
+    public static ArrayList<String> getAddedEntryPersonalNamefromMARC21(ArrayList<String> addedEntryPersonalNameInfo) {
+        ArrayList<String> addedEntryPersonalName = new ArrayList<>();
+        if (addedEntryPersonalNameInfo.isEmpty()) {
+            addedEntryPersonalName.add("---");
+        } else {
+            for (int i = 0; i < addedEntryPersonalNameInfo.size(); i++) {
+                String substrg = addedEntryPersonalNameInfo.get(i);
+                int startIndex = substrg.indexOf("| a");
+                if(startIndex >= 0) {
+                    substrg = substrg.substring(startIndex + 3);
+                    int endIndex = substrg.indexOf("|");
+                    if(endIndex >= 0) {
+                        addedEntryPersonalName.add(addedEntryPersonalNameInfo.get(i).substring(startIndex + 3,startIndex + 3 + endIndex));
+                    } else {
+                        addedEntryPersonalName.add(substrg);
+                    } 
+                }  
+            }
+        }
+    return addedEntryPersonalName;
     }
 }

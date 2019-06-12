@@ -5,11 +5,10 @@
  */
 package fxml;
 
-import com.mycompany.myvdktester.ItemSorter;
 import com.mycompany.myvdktester.CSVParserAndWriter;
 import com.mycompany.myvdktester.DocumentManager;
 import com.mycompany.myvdktester.HTMLParser;
-import com.mycompany.myvdktester.MyVDKTesterNewWindowFXMLController;
+import com.mycompany.myvdktester.ItemSorter;
 import com.mycompany.myvdktester.URLBuilder;
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +53,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+//import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -170,6 +171,7 @@ public class MyVDKTesterFXMLController implements Initializable {
                 return new Task() {
                  @Override
                  protected Void call() throws URISyntaxException, MalformedURLException, IOException{
+                    selectedIDsForHighlighting.clear();
                     checkFieldsButton.setDisable(true);
                     if (i != 0) {
                         undoButton.setDisable(false);
@@ -197,8 +199,12 @@ public class MyVDKTesterFXMLController implements Initializable {
                     for(int k = 0; k < selectedOAIsOfSimmilarTitles.size(); k++) {
                         rightURLOfMARC21Record = urlBuilder.buildMarc21RecordURL(selectedOAIsOfSimmilarTitles.get(k));
                         org.jsoup.nodes.Document docOfMARC21Record = DocumentManager.getDocument(rightURLOfMARC21Record);
-                        String publicationDate = DocumentManager.getPublicationDatefromMARC21(htmlParser.getPublicationDateInfofromMARC21(docOfMARC21Record));
-                        if (publicationDate == null ? publicationDates.get(i) == null : publicationDate.equals(publicationDates.get(i))) {
+                        String publicationDate = DocumentManager.getPublicationDatefromMARC21(htmlParser.getPublicationInfofromMARC21(docOfMARC21Record));
+                        publicationDate = publicationDate.replaceAll("\\D+","");
+                        String publicationDateCSV = publicationDates.get(i);
+//                        publicationDateCSV = publicationDateCSV.replaceAll("\\D+","");
+//                        System.out.println(publicationDateCSV);
+                        if (!"---".equals(publicationDate) && publicationDateCSV != null && publicationDate.equals(publicationDateCSV)) {
                             String OAIOfEqualItems = selectedOAIsOfSimmilarTitles.get(k);
                             String id = DocumentManager.getIDOfOAI(connectedIDWithOAIs, OAIOfEqualItems);
                             if(id == null ? mainID != null : !id.equals(mainID)) {
@@ -285,48 +291,51 @@ public class MyVDKTesterFXMLController implements Initializable {
         this.webView1.getEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {           
             @Override            
             public void changed(ObservableValue ov, State oldState, State newState) {
-                if (newState.equals(State.SUCCEEDED) && (mainID != null)){
-                    Document doc = webView1.getEngine().getDocument();
-                    Element elMain = doc.getElementById(mainID);
-                    if(elMain != null && allItemsInListOnLeft != null) {
-                        elMain.setAttribute("style", "background-color:#ffad99;");
-                        for(int i = 0; i < allItemsInListOnLeft.size(); i++) {
-                            org.jsoup.nodes.Element el = allItemsInListOnLeft.get(i);
-                            String elID = el.id();
-                            if(el != null && !elID.equals(mainID)) {
-                                Element elHide = doc.getElementById(elID);
-                                elHide.setAttribute("style", "display: none;");
-                                Node line = elHide.getNextSibling().getNextSibling();
-                                if (line.getNodeType() == Node.ELEMENT_NODE) {
-                                    Element elLine = (Element) line;
-                                    elLine.setAttribute("style", "display: none;");
+                if(newState.equals(State.SUCCEEDED)) {
+                    progressIndicator.setVisible(false);
+                    if(mainID != null){
+                        Document doc = webView1.getEngine().getDocument();
+                        Element elMain = doc.getElementById(mainID);
+                        if(elMain != null && allItemsInListOnLeft != null) {
+                            elMain.setAttribute("style", "background-color:#ffad99;");
+                            for(int i = 0; i < allItemsInListOnLeft.size(); i++) {
+                                org.jsoup.nodes.Element el = allItemsInListOnLeft.get(i);
+                                String elID = el.id();
+                                if(el != null && !elID.equals(mainID)) {
+                                    Element elHide = doc.getElementById(elID);
+                                    elHide.setAttribute("style", "display: none;");
+                                    Node line = elHide.getNextSibling().getNextSibling();
+                                    if (line.getNodeType() == Node.ELEMENT_NODE) {
+                                        Element elLine = (Element) line;
+                                        elLine.setAttribute("style", "display: none;");
+                                    }
                                 }
                             }
                         }
                     }
-                progressIndicator.setVisible(false);
                 }
-            
             }
         });
         
         this.webView2.getEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
             @Override           
             public void changed(ObservableValue ov, State oldState, State newState) {
-                if (newState.equals(State.SUCCEEDED) && (mainID != null)) {
-                    Document doc = (Document) webView2.getEngine().getDocument();
-                    Element elMainID = (Element) doc.getElementById(mainID);
-                    if(elMainID != null) {
-                        elMainID.setAttribute("style", "display: none;");
-                    }
-                    for(int i = 0; i < selectedIDsForHighlighting.size(); i++) {
-                        String selectedID = selectedIDsForHighlighting.get(i);
-                        Element elID = doc.getElementById(selectedID);                        
-                        if(elID != null) {
-                            elID.setAttribute("style", "background-color:#80e5ff;");                           
+                if (newState.equals(State.SUCCEEDED)) {
+                    progressIndicator.setVisible(false);
+                    if(mainID != null) {
+                        Document doc = (Document) webView2.getEngine().getDocument();
+                        Element elMainID = (Element) doc.getElementById(mainID);
+                        if(elMainID != null) {
+                            elMainID.setAttribute("style", "display: none;");
+                        }
+                        for(int i = 0; i < selectedIDsForHighlighting.size(); i++) {
+                            String selectedID = selectedIDsForHighlighting.get(i);
+                            Element elID = doc.getElementById(selectedID);                        
+                            if(elID != null) {
+                                elID.setAttribute("style", "background-color:#80e5ff;");                           
+                            }
                         }
                     }
-                progressIndicator.setVisible(false);
                 }
             }
         });
@@ -545,19 +554,187 @@ public class MyVDKTesterFXMLController implements Initializable {
         String isbnLeft = DocumentManager.getISBNfromMARC21(htmlParser.getISBNInfofromMARC21(docLeftMARC21));
         String ccnbRight = DocumentManager.getCCNBfromMARC21(htmlParser.getCCNBInfofromMARC21(docRightMARC21));       
         String ccnbLeft = DocumentManager.getCCNBfromMARC21(htmlParser.getCCNBInfofromMARC21(docLeftMARC21));
-        String titleRight = DocumentManager.getTitlefromMARC21(htmlParser.getTitleInfofromMARC21(docRightMARC21));
-        String titleLeft = DocumentManager.getTitlefromMARC21(htmlParser.getTitleInfofromMARC21(docLeftMARC21));
+        String mainEntryRight;
+        String mainEntryLeft;
+        String mainEntryInfoRight = htmlParser.getMainEntryPersonalNameInfofromMARC21(docRightMARC21);
+        String mainEntryInfoLeft = htmlParser.getMainEntryPersonalNameInfofromMARC21(docLeftMARC21);
+        int mainEntryField = 100;
+        if ("".equals(mainEntryInfoRight) && "".equals(mainEntryInfoLeft)) {
+            mainEntryInfoRight = htmlParser.getMainEntryCorporateNameInfofromMARC21(docRightMARC21);       
+            mainEntryInfoLeft = htmlParser.getMainEntryCorporateNameInfofromMARC21(docLeftMARC21);
+            mainEntryRight = DocumentManager.getMainEntryPersonalNamefromMARC21(mainEntryInfoRight);       
+            mainEntryLeft = DocumentManager.getMainEntryPersonalNamefromMARC21(mainEntryInfoLeft);
+            mainEntryField = 110;
+            if ("".equals(mainEntryInfoRight) && "".equals(mainEntryInfoLeft)) {
+                mainEntryInfoRight = htmlParser.getMainEntryMeetingNameInfofromMARC21(docRightMARC21);
+                mainEntryInfoLeft = htmlParser.getMainEntryMeetingNameInfofromMARC21(docLeftMARC21);
+                mainEntryRight = DocumentManager.getMainEntryPersonalNamefromMARC21(mainEntryInfoRight);       
+                mainEntryLeft = DocumentManager.getMainEntryPersonalNamefromMARC21(mainEntryInfoLeft);
+                mainEntryField = 111;
+            }
+        } else {
+        mainEntryRight = DocumentManager.getMainEntryPersonalNamefromMARC21(mainEntryInfoRight);       
+        mainEntryLeft = DocumentManager.getMainEntryPersonalNamefromMARC21(mainEntryInfoLeft);
+        }
+        
+        ArrayList<String> addedPersonalNameRight = DocumentManager.getAddedEntryPersonalNamefromMARC21(htmlParser.getAddedEntryPersonalNameInfofromMARC21(docRightMARC21));       
+        ArrayList<String> addedPersonalNameLeft = DocumentManager.getAddedEntryPersonalNamefromMARC21(htmlParser.getAddedEntryPersonalNameInfofromMARC21(docLeftMARC21));
+        String placeOfPublicationLeft = DocumentManager.getPlaceOfPublicationfromMARC21(htmlParser.getPublicationInfofromMARC21(docLeftMARC21));
+        String placeOfPublicationRight = DocumentManager.getPlaceOfPublicationfromMARC21(htmlParser.getPublicationInfofromMARC21(docRightMARC21));
+        String publisherLeft = DocumentManager.getPublisherfromMARC21(htmlParser.getPublicationInfofromMARC21(docLeftMARC21));
+        String publisherRight = DocumentManager.getPublisherfromMARC21(htmlParser.getPublicationInfofromMARC21(docRightMARC21));
+        String publicationDateLeft = DocumentManager.getPublicationDatefromMARC21(htmlParser.getPublicationInfofromMARC21(docLeftMARC21));
+        String publicationDateRight = DocumentManager.getPublicationDatefromMARC21(htmlParser.getPublicationInfofromMARC21(docRightMARC21));
+        String titleRight = DocumentManager.getTitlefromMARC21(htmlParser.getTitleStatementfromMARC21(docRightMARC21));
+        String titleLeft = DocumentManager.getTitlefromMARC21(htmlParser.getTitleStatementfromMARC21(docLeftMARC21));
+        String remainderOfTitleRight = DocumentManager.getRemainderOfTitlefromMARC21(htmlParser.getTitleStatementfromMARC21(docRightMARC21));
+        String remainderOfTitleLeft = DocumentManager.getRemainderOfTitlefromMARC21(htmlParser.getTitleStatementfromMARC21(docLeftMARC21));
+        String extentRight = DocumentManager.getExtentfromMARC21(htmlParser.getPhysicalDescriptionInfofromMARC21(docRightMARC21));
+        String extentLeft = DocumentManager.getExtentfromMARC21(htmlParser.getPhysicalDescriptionInfofromMARC21(docLeftMARC21));
         Text boldISBN = new Text("ISBN:");
         boldISBN.setStyle("-fx-font-weight: bold");
         Text boldCCNB = new Text("čČNB:");
         boldCCNB.setStyle("-fx-font-weight: bold");
-        Text comparingISBN = new Text (" \n " + isbnLeft + " / " + isbnRight + " \n "); 
-        Text comparingCCNB = new Text (" \n " + ccnbLeft + " / " + ccnbRight + " \n "); 
-        Text comparingTitle = new Text (" \n " + titleLeft + " / " + titleRight + " \n ");
         Text boldTitle = new Text("Název:");
         boldTitle.setStyle("-fx-font-weight: bold");
+        Text boldRemainderOfTitle = new Text("Podnázev:");
+        boldRemainderOfTitle.setStyle("-fx-font-weight: bold");
+        Text boldMainEntry = new Text();
+        switch (mainEntryField) {
+            case 100:
+                {
+                    boldMainEntry = new Text("Hlavní autor:");
+                    break;
+                }
+            case 110:
+                {
+                    boldMainEntry = new Text("Jméno korporace - hlavní záhlaví:");
+                    break;
+                }
+            case 111:
+                {
+                    boldMainEntry = new Text("Jméno akce - hlavní záhlaví:");
+                    break;
+                }
+        }
+        
+        boldMainEntry.setStyle("-fx-font-weight: bold");
+        Text boldAddedPersonalName = new Text("Přispěvatel:");
+        boldAddedPersonalName.setStyle("-fx-font-weight: bold");
+        Text boldPlaceOfPublication = new Text("Místo vydání:");
+        boldPlaceOfPublication.setStyle("-fx-font-weight: bold");
+        Text boldPublisher = new Text("Nakladatel:");
+        boldPublisher.setStyle("-fx-font-weight: bold");
+        Text boldPublicationDate = new Text("Datum vydání");
+        boldPublicationDate.setStyle("-fx-font-weight: bold");
+        Text boldExtent = new Text("Počet stran:");
+        boldExtent.setStyle("-fx-font-weight: bold");    
+        Text comparingISBN = new Text (" \n " + isbnLeft + " / " + isbnRight + " \n ");
+        if(!"---".equals(isbnLeft) && !"---".equals(isbnRight)) {
+            if(isbnRight.equals(isbnLeft)) {
+                comparingISBN.setStyle("-fx-fill: green");
+            } else {
+                comparingISBN.setStyle("-fx-fill: red");
+            }  
+        }      
+        Text comparingCCNB = new Text (" \n " + ccnbLeft + " / " + ccnbRight + " \n ");
+        if(!"---".equals(ccnbLeft) && !"---".equals(ccnbRight)) {
+            if(ccnbRight.equals(ccnbLeft)) {
+                comparingCCNB.setStyle("-fx-fill: green");
+            } else {
+                comparingCCNB.setStyle("-fx-fill: red");
+            }
+        }
+        Text comparingTitle = new Text (" \n " + titleLeft + " / " + titleRight + " \n ");
+        if(!"---".equals(titleLeft) && !"---".equals(titleRight)) {
+            if(ItemSorter.compareTitles(titleLeft, titleRight) > 0.7){
+                comparingTitle.setStyle("-fx-fill: green");
+            } else {
+                comparingTitle.setStyle("-fx-fill: red");
+            }
+        }
+        Text comparingRemainderOfTitle = new Text (" \n " + remainderOfTitleLeft + " / " + remainderOfTitleRight + " \n ");
+        if(!"---".equals(remainderOfTitleLeft) && !"---".equals(remainderOfTitleRight)) {
+            if(ItemSorter.compareTitles(remainderOfTitleLeft, remainderOfTitleRight) > 0.7){
+                comparingRemainderOfTitle.setStyle("-fx-fill: green");
+            } else {
+                comparingRemainderOfTitle.setStyle("-fx-fill: red");
+            }
+        }
+        Text comparingMainEntry = new Text (" \n " + mainEntryLeft + " / " + mainEntryRight + " \n ");
+        if(!"---".equals(mainEntryLeft) && !"---".equals(mainEntryRight)) {
+            if(ItemSorter.compareTitles(mainEntryLeft, mainEntryRight) > 0.7){
+                comparingMainEntry.setStyle("-fx-fill: green");
+            } else {
+                comparingMainEntry.setStyle("-fx-fill: red");
+            }
+        }
+        Text comparingAddedPersonalName = new Text();
+        String stringToDisplay = "";
+        int maxSize = Math.max(addedPersonalNameLeft.size(), addedPersonalNameRight.size());
+        if(!addedPersonalNameLeft.isEmpty() && !addedPersonalNameRight.isEmpty()) {
+            Collections.sort(addedPersonalNameLeft, String.CASE_INSENSITIVE_ORDER);
+            Collections.sort(addedPersonalNameRight, String.CASE_INSENSITIVE_ORDER);
+        }
+        for (int i = 0; i < maxSize; i++) {
+            if(addedPersonalNameLeft.size() != maxSize) {
+                addedPersonalNameLeft.add((addedPersonalNameLeft.size()), "---");
+            }
+            if(addedPersonalNameRight.size() != maxSize) {
+                addedPersonalNameRight.add((addedPersonalNameRight.size()), "---");
+            }
+            stringToDisplay = stringToDisplay + addedPersonalNameLeft.get(i) + " / " + addedPersonalNameRight.get(i) + " \n ";
+            if(!"---".equals(addedPersonalNameLeft.get(i)) && !"---".equals(addedPersonalNameRight.get(i))) {
+                if(ItemSorter.compareTitles(addedPersonalNameLeft.get(i), addedPersonalNameRight.get(i)) > 0.7){
+                    comparingAddedPersonalName.setStyle("-fx-fill: green");
+                } else {
+                    comparingAddedPersonalName.setStyle("-fx-fill: red");
+                }
+            }
+        }
+        comparingAddedPersonalName.setText(" \n " + stringToDisplay);
+        Text comparingPlaceOfPublication = new Text (" \n " + placeOfPublicationLeft + " / " + placeOfPublicationRight + " \n ");
+        if(!"---".equals(placeOfPublicationLeft) && !"---".equals(placeOfPublicationRight)) {
+            if(ItemSorter.compareTitles(placeOfPublicationLeft, placeOfPublicationRight) > 0.7){
+                comparingPlaceOfPublication.setStyle("-fx-fill: green");
+            } else {
+                comparingPlaceOfPublication.setStyle("-fx-fill: red");
+            }
+        }
+        Text comparingPublisher = new Text (" \n " + publisherLeft + " / " + publisherRight + " \n ");
+        if(!"---".equals(publisherLeft) && !"---".equals(publisherRight)) {
+            if(ItemSorter.compareTitles(publisherLeft, publisherRight) > 0.7){
+                comparingPublisher.setStyle("-fx-fill: green");
+            } else {
+                comparingPublisher.setStyle("-fx-fill: red");
+            }
+        }
+        Text comparingPublicationDate = new Text (" \n " + publicationDateLeft + " / " + publicationDateRight + " \n ");
+        if(!"---".equals(publicationDateLeft) && !"---".equals(publicationDateRight)) {
+            if(publicationDateRight.equals(publicationDateLeft)) {
+                comparingPublicationDate.setStyle("-fx-fill: green");
+            } else {
+                comparingPublicationDate.setStyle("-fx-fill: red");
+            }
+        }
+        Text comparingExtent = new Text (" \n " + extentLeft + " / " + extentRight + " \n ");
+        if(!"---".equals(extentLeft) && !"---".equals(extentRight)) {
+            extentLeft = extentLeft.replaceAll("\\D+","");
+            extentRight = extentRight.replaceAll("\\D+","");
+            if(extentRight.equals(extentLeft)) {
+                comparingExtent.setStyle("-fx-fill: green");
+            } else {
+                comparingExtent.setStyle("-fx-fill: red");
+            }
+        }
         this.textFlow.getChildren().clear();
-        this.textFlow.getChildren().addAll(boldISBN, comparingISBN, boldCCNB, comparingCCNB, boldTitle, comparingTitle);
+        this.textFlow.getChildren().addAll
+            (boldISBN, comparingISBN, boldCCNB, comparingCCNB, boldTitle, comparingTitle,
+            boldRemainderOfTitle, comparingRemainderOfTitle,
+            boldMainEntry, comparingMainEntry, boldAddedPersonalName, comparingAddedPersonalName,
+            boldPlaceOfPublication, comparingPlaceOfPublication, boldPublisher, comparingPublisher, 
+            boldPublicationDate, comparingPublicationDate, boldExtent, comparingExtent
+            );
     }
     
     private Optional<ButtonType> confirmationWindow(String typeOfSortedTitles) {
