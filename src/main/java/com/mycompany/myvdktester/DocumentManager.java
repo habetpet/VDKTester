@@ -37,6 +37,32 @@ public class DocumentManager {
     return id;    
     }
     
+    public static ArrayList<String> getIDsForHighlighting(String mainID, String title, String publicationDateForComparison) throws IOException, URISyntaxException {
+        HTMLParser htmlParser = new HTMLParser();
+        URLBuilder urlBuilder = new URLBuilder();
+        ArrayList<String> idsForHighlighting = new ArrayList<>();
+        String url = urlBuilder.buildRightURL(title);
+        ArrayList<String> potencialTitles = htmlParser.getAllTitlesOnPage(DocumentManager.getDocument(url));
+        Elements allItemsInList = htmlParser.getAllItemsInList(DocumentManager.getDocument(url));
+        Map<String,ArrayList<String>> connectedIDWithOAIs = DocumentManager.connectIDWithRespectiveOAIs(allItemsInList);         
+        ArrayList<String> selectedIDsOfSimilarTitles = DocumentManager.getIDsOfSimilarTitles(allItemsInList, title, potencialTitles);
+        ArrayList<String> selectedOAIsOfSimmilarTitles = DocumentManager.getOAIsOfID(connectedIDWithOAIs, selectedIDsOfSimilarTitles);
+        for(int k = 0; k < selectedOAIsOfSimmilarTitles.size(); k++) {
+            String urlMARC21 = urlBuilder.buildMarc21RecordURL(selectedOAIsOfSimmilarTitles.get(k));
+            org.jsoup.nodes.Document docOfMARC21Record = DocumentManager.getDocument(urlMARC21);
+            String publicationDate = DocumentManager.getPublicationDatefromMARC21(htmlParser.getPublicationInfofromMARC21(docOfMARC21Record));
+            publicationDate = publicationDate.replaceAll("\\D+","");
+            if (!"---".equals(publicationDate) && publicationDateForComparison != null && publicationDate.equals(publicationDateForComparison)) {
+                String OAIOfEqualItems = selectedOAIsOfSimmilarTitles.get(k);
+                String id = DocumentManager.getIDOfOAI(connectedIDWithOAIs, OAIOfEqualItems);
+                if(id == null ? mainID != null : !id.equals(mainID)) {
+                    idsForHighlighting.add(id);
+                }
+            }
+        }            
+    return idsForHighlighting;
+    }
+    
     public static Map<String,ArrayList<String>> connectIDWithRespectiveOAIs(Elements items) {
         Map<String,ArrayList<String>> idWithOAIs = new HashMap<>();           
         items.forEach((el) -> {
@@ -85,14 +111,24 @@ public class DocumentManager {
         }
     return null;
     }
-    public static String getISBNfromMARC21(String isbnInfo) {
-        String isbn = "---";
-        int startIndex = isbnInfo.indexOf("|a");
-        if(startIndex >= 0) {
-            isbn = isbnInfo.substring(startIndex + 2);
-            int endIndex = isbn.indexOf("|");
-            if(endIndex >= 0) {
-                isbn = isbnInfo.substring(startIndex + 2,startIndex + 2 + endIndex);
+    
+    public static ArrayList<String> getISBNfromMARC21(ArrayList<String> isbnInfo) {
+        ArrayList<String> isbn = new ArrayList<>();
+        if (isbnInfo.isEmpty()) {
+            isbn.add("---");
+        } else {
+            for (int i = 0; i < isbnInfo.size(); i++) {
+                String substrg = isbnInfo.get(i);
+                int startIndex = substrg.indexOf("|a");
+                if(startIndex >= 0) {
+                    substrg = substrg.substring(startIndex + 2);
+                    int endIndex = substrg.indexOf("|");
+                    if(endIndex >= 0) {
+                        isbn.add(isbnInfo.get(i).substring(startIndex + 2,startIndex + 2 + endIndex));
+                    } else {
+                        isbn.add(substrg);
+                    } 
+                }  
             }
         }
     return isbn;
@@ -110,18 +146,29 @@ public class DocumentManager {
         }
     return wrongISBN;
     }
-    public static String getCCNBfromMARC21(String isbnInfo) {
-        String ccnb = "---";
-        int startIndex = isbnInfo.indexOf("|acnb");
-        if(startIndex >= 0) {
-            ccnb = isbnInfo.substring(startIndex + 5);
-            int endIndex = ccnb.indexOf("|");
-            if(endIndex >= 0) {
-                ccnb = isbnInfo.substring(startIndex + 5,startIndex + 5 + endIndex);
+    
+    public static ArrayList<String> getCCNBfromMARC21(ArrayList<String> ccnbInfo) {
+        ArrayList<String> ccnb = new ArrayList<>();
+        if (ccnbInfo.isEmpty()) {
+            ccnb.add("---");
+        } else {
+            for (int i = 0; i < ccnbInfo.size(); i++) {
+                String substrg = ccnbInfo.get(i);
+                int startIndex = substrg.indexOf("|acnb");
+                if(startIndex >= 0) {
+                    substrg = substrg.substring(startIndex + 5);
+                    int endIndex = substrg.indexOf("|");
+                    if(endIndex >= 0) {
+                        ccnb.add(ccnbInfo.get(i).substring(startIndex + 5,startIndex + 5 + endIndex));
+                    } else {
+                        ccnb.add(substrg);
+                    } 
+                }  
             }
         }
     return ccnb;
     }
+    
     public static String getPublicationDatefromMARC21(String publicationInfo) {
         String publicationDate = "---";
         publicationInfo = publicationInfo.replaceAll("\\s", "");
@@ -201,30 +248,17 @@ public class DocumentManager {
     return extent;
     }
     
-    public static String getMainEntryPersonalNamefromMARC21(String mainEntryPersonalNameInfo) {
-        String mainEntryPersonalName = "---";
+    public static String getMainAuthorityfromMARC21(String mainEntryPersonalNameInfo) {
+        String mainAuthority = "---";
         int startIndex = mainEntryPersonalNameInfo.indexOf("| a");
         if(startIndex >= 0) {
-            mainEntryPersonalName = mainEntryPersonalNameInfo.substring(startIndex + 3);
-            int endIndex = mainEntryPersonalName.indexOf("|");
+            mainAuthority = mainEntryPersonalNameInfo.substring(startIndex + 3);
+            int endIndex = mainAuthority.indexOf("|");
             if(endIndex >= 0) {
-                mainEntryPersonalName = mainEntryPersonalNameInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
+                mainAuthority = mainEntryPersonalNameInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
             }
         }      
-    return mainEntryPersonalName;
-    }
-    
-    public static String getMainEntryfromMARC21(String mainEntryInfo) {
-        String mainEntryPersonalName = "---";
-        int startIndex = mainEntryInfo.indexOf("| a");
-        if(startIndex >= 0) {
-            mainEntryPersonalName = mainEntryInfo.substring(startIndex + 3);
-            int endIndex = mainEntryPersonalName.indexOf("|");
-            if(endIndex >= 0) {
-                mainEntryPersonalName = mainEntryInfo.substring(startIndex + 3,startIndex + 3 + endIndex);
-            }
-        }      
-    return mainEntryPersonalName;
+    return mainAuthority;
     }
     
     public static ArrayList<String> getAddedEntryPersonalNamefromMARC21(ArrayList<String> addedEntryPersonalNameInfo) {

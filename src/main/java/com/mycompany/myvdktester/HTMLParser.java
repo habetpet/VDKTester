@@ -15,8 +15,7 @@ import org.jsoup.select.Elements;
  * @author HABETINOVAP
  */
 public class HTMLParser {    
-    //vstup: html dokument doc
-    // výstup: celkový počet vyhledaných titulů ve formátu Integer 
+
     public Integer getNumberOfResults(Document doc){
         Element el = doc.getElementById("totalHits");
         int results = Integer.parseInt((el.attr("value")));        
@@ -34,16 +33,6 @@ public class HTMLParser {
     return dataCSV;
     }
     
-//    public ArrayList<String> getAllIDsOnPage(Document doc) {
-//        ArrayList<String> ids = null;
-//        Elements items = getAllItemsInList(doc);
-//        items.forEach((item) -> {
-//            ids.add(item.id());
-//        });
-//    return ids;
-//    }
-    
-    // metoda zapíše všechny názvy titulů z načtené stránky
     public ArrayList<String> getAllTitlesOnPage(Document doc) {
         ArrayList<String> allTitlesOnPage = new ArrayList<>();
         Elements titles = getAllItemsInList(doc).select("div.title");
@@ -53,21 +42,24 @@ public class HTMLParser {
     return allTitlesOnPage;
     }
     
-    public String getISBNInfofromMARC21(Document doc) {
-        String isbnInfo;
-        Elements records = doc.select("tr");        
-        isbnInfo = records.select("th:contains(020)").next().text().replaceAll("\\s","");
+    public ArrayList<String> getISBNInfofromMARC21(Document doc) {
+        ArrayList<String> isbnInfo = new ArrayList<>();
+        Elements records = doc.select("tr").select("th:contains(020)").next();
+        records.forEach((el) -> {
+            isbnInfo.add(el.text().replaceAll("\\s",""));
+        });               
         return isbnInfo;
     }
     
-    public String getCCNBInfofromMARC21(Document doc) {
-        String ccnbInfo;
-        Elements records = doc.select("tr");        
-        ccnbInfo = records.select("th:contains(015)").next().text().replaceAll("\\s","");
+    public ArrayList<String> getCCNBInfofromMARC21(Document doc) {
+        ArrayList<String> ccnbInfo = new ArrayList<>();
+        Elements records = doc.select("tr").select("th:contains(015)").next(); 
+        records.forEach((el) -> {
+            ccnbInfo.add(el.text().replaceAll("\\s",""));
+        });
         return ccnbInfo;
     }
     
-    // metoda získá datum vydání parsováním stránky se záznamem v MARC 21
     public String getPublicationInfofromMARC21(Document doc) {
         Elements records = doc.select("tr");        
         String publicationInfo = records.select("th:contains(260)").next().text();     

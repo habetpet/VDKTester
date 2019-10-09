@@ -27,17 +27,17 @@ public class CSVParserAndWriter {
             new FileOutputStream(file),
             Charset.forName("UTF-8").newEncoder()
         );  
-        CSVWriter writer = new CSVWriter(
-            encodedWriter, 
-            '\t', 
-            CSVWriter.DEFAULT_QUOTE_CHARACTER, 
-            CSVWriter.DEFAULT_ESCAPE_CHARACTER, 
-            CSVWriter.DEFAULT_LINE_END
-        );
-        for (int i = 0; i < position.size(); i++){
+        try (CSVWriter writer = new CSVWriter(
+                encodedWriter,
+                '\t',
+                CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                CSVWriter.DEFAULT_LINE_END
+        )) {
+            for (int i = 0; i < position.size(); i++){
                 writer.writeNext(lines.get(position.get(i)));
-            }  
-        writer.close(); 
+            }
+        } 
     }
     
     // Čtení a parsování souboru csv   
@@ -54,28 +54,28 @@ public class CSVParserAndWriter {
     return lines;
     }
     
-    // Uložení všech názvů knih do ArrayList<String> titles
-    public static ArrayList<String> getTitles(List<String[]> lines) {
-        ArrayList<String> titles = new ArrayList<>();        
+    // Uložení titulů do String[] titles 
+    public static String[] getTitles(List<String[]> lines) {
+        String[] titles = new String[lines.size()];        
         for (int i = 0; i < lines.size(); i++){               
-            titles.add(lines.get(i)[3]);              
+            titles[i] = lines.get(i)[3];              
         }
     return titles;
     }
     
-    // Získání dat vydání
-    public static ArrayList<String> getPublicationDates(List<String[]> lines) {
-        ArrayList<String> publicationDates = new ArrayList<>();
+    // Uložení dat vydání do String[] publicationDates    
+    public static String[] getPublicationDates(List<String[]> lines) {
+        String[] publicationDates = new String[lines.size()];
         String publicationInfo;
         String publicationDate;
         for (int i = 0; i < lines.size(); i++){ 
             publicationInfo = lines.get(i)[10]; 
             if(publicationInfo != null && publicationInfo.lastIndexOf(",") > 0) {
                 publicationDate = publicationInfo.substring(publicationInfo.lastIndexOf(",") + 1, publicationInfo.length());
-                publicationDates.add(publicationDate);             
+                publicationDates[i] = publicationDate;             
             }
             else {
-                publicationDates.add(null);  
+                publicationDates[i] = null;  
             } 
         }      
     return publicationDates;
