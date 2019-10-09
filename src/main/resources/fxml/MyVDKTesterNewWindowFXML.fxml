@@ -9,9 +9,9 @@
 <AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxml.MyVDKTesterNewWindowFXMLController">
    <children>
       <ComboBox fx:id="chooseSourceCB" layoutX="28.0" layoutY="90.0" onAction="#choosingSource" prefHeight="47.0" prefWidth="192.0" promptText="Knihovna" />
-      <Label layoutX="28.0" layoutY="43.0" prefHeight="33.0" prefWidth="192.0" text="Vyber knihovnu a soubor:" />
-      <Button fx:id="fileChooserButton" layoutX="309.0" layoutY="90.0" mnemonicParsing="false" onAction="#openFileChooser" prefHeight="47.0" prefWidth="192.0" text="Vyber soubor .csv" />
-      <Button fx:id="loadFile" layoutX="309.0" layoutY="299.0" mnemonicParsing="false" onAction="#loadAndCloseWindow" prefHeight="47.0" prefWidth="192.0" text="Nahrát!" />
+      <Label layoutX="28.0" layoutY="43.0" prefHeight="33.0" prefWidth="192.0" text="Prosím vyberte knihovnu a soubor:" />
+      <Button fx:id="fileChooserButton" layoutX="309.0" layoutY="90.0" mnemonicParsing="false" onAction="#openFileChooser" prefHeight="47.0" prefWidth="192.0" text="Soubor " />
+      <Button fx:id="loadFile" layoutX="309.0" layoutY="299.0" mnemonicParsing="false" onAction="#loadAndCloseWindow" prefHeight="47.0" prefWidth="192.0" text="Nahrát" />
       <Label fx:id="fileDirectory" layoutX="309.0" layoutY="162.0" prefHeight="47.0" prefWidth="192.0" />
    </children>
 </AnchorPane>

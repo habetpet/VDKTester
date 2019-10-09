@@ -42,6 +42,7 @@ public class MyVDKTesterNewWindowFXMLController implements Initializable {
     FileChooser fileChooser = new FileChooser();
     FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV File", "*.csv");
     String filePath;
+    String fileName;
     String source;
     File file;
 
@@ -54,14 +55,34 @@ public class MyVDKTesterNewWindowFXMLController implements Initializable {
         chooseSourceCB.setItems(sources);
     }
     
-    public String getPath(){
-        filePath = file.getPath();
-        return filePath;
+    public String getPath(){        
+        if(file != null) {
+            filePath = file.getPath();
+            return filePath;
+        }
+        else {
+            return null;
+        }  
     }
     
-    public String getSource(){
-        source = chooseSourceCB.getValue();
-        return source;
+     public String getFileName(){        
+        if(file != null) {
+            fileName = file.getName();
+            return fileName;
+        }
+        else {
+            return null;
+        }  
+    }
+    
+    public String getSource(){       
+        if(chooseSourceCB != null) {
+            source = chooseSourceCB.getValue();
+            return source;
+        }
+        else {
+            return null;
+        } 
     }
     
     private List<String> getAllSources(){
@@ -91,8 +112,10 @@ public class MyVDKTesterNewWindowFXMLController implements Initializable {
     private void openFileChooser(ActionEvent event) {
         fileChooser.getExtensionFilters().add(extFilter);
         fileChooser.setTitle("Open Resource File");       
-        file = fileChooser.showOpenDialog(stage);      
-        fileDirectory.setText(file.getName());
+        file = fileChooser.showOpenDialog(stage);  
+        if (file != null) {
+            fileDirectory.setText(file.getName());
+        }
     }
     
     @FXML
@@ -105,7 +128,7 @@ public class MyVDKTesterNewWindowFXMLController implements Initializable {
         if (file != null && source != null) {              
             ((Node)(event.getSource())).getScene().getWindow().hide();            
         }
-        fileDirectory.setText("Vyber soubor a knihovnu!");
+        fileDirectory.setText("Prosím vyberte soubor a knihovnu.");
     }
 
 
